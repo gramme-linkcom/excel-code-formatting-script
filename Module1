@@ -1,0 +1,167 @@
+Sub FormatSourceCodeReport_V4_Final()
+
+    ' --- ユーザー設定項目 ---
+    Const CODE_COLUMN As String = "C" ' ソースコード列
+    Const LINENUM_COLUMN As String = "B" ' 行番号列
+    Const START_ROW As Long = 2
+    
+    ' --- 設定読み込みセル ---
+    Const FONT_NAME_CELL As String = "I9"
+    Const FONT_SIZE_CELL As String = "I11"
+    ' --- 設定項目はここまで ---
+    
+    Dim targetSheet As Worksheet
+    Dim codeColumnRange As Range
+    Dim linenumColumnRange As Range
+    Dim targetCell As Range
+    Dim lastRow As Long
+    Dim i As Long
+    Dim j As Long
+    Dim totalChars As Long
+    
+    Dim inputFontName As String
+    Dim actualFontSize As Double
+    
+    Set targetSheet = ActiveSheet
+
+    ' --- セル I9, I11 から設定を読み込み ---
+    ' フォント名の取得
+    inputFontName = targetSheet.Range(FONT_NAME_CELL).Value
+    If inputFontName = "" Then
+        MsgBox "セル " & FONT_NAME_CELL & " にフォント名が入力されていません。"
+        Exit Sub
+    End If
+    
+    ' フォントサイズの取得
+    If Not IsNumeric(targetSheet.Range(FONT_SIZE_CELL).Value) Or IsEmpty(targetSheet.Range(FONT_SIZE_CELL).Value) Then
+        MsgBox "セル " & FONT_SIZE_CELL & " にフォントサイズが数値で入力されていません。"
+        Exit Sub
+    End If
+    
+    actualFontSize = CDbl(targetSheet.Range(FONT_SIZE_CELL).Value)
+    If actualFontSize <= 0 Then
+        MsgBox "セル " & FONT_SIZE_CELL & " のフォントサイズは0より大きい数値にしてください。"
+        Exit Sub
+    End If
+    ' --- 読み込み完了 ---
+
+    ' 特定の色 (#DAE3E3) をRGBで指定
+    Dim targetColor As Long
+    targetColor = RGB(218, 227, 227)
+
+    Set codeColumnRange = targetSheet.Columns(CODE_COLUMN)
+    Set linenumColumnRange = targetSheet.Columns(LINENUM_COLUMN)
+
+    Application.ScreenUpdating = False
+
+    ' 1. フォントの設定
+    With codeColumnRange.Font
+        .Name = inputFontName
+        .Size = actualFontSize
+    End With
+
+    ' 4. 背景色を透明に
+    codeColumnRange.Interior.ColorIndex = xlNone
+
+    ' 2 & 3. 行番号 と フォント色変更
+    linenumColumnRange.ClearContents
+    lastRow = targetSheet.Cells(targetSheet.Rows.Count, CODE_COLUMN).End(xlUp).Row
+
+    If lastRow >= START_ROW Then
+    
+        Dim borderRange As Range
+        Set borderRange = targetSheet.Range( _
+            targetSheet.Cells(START_ROW, LINENUM_COLUMN), _
+            targetSheet.Cells(lastRow, CODE_COLUMN) _
+        )
+        
+        borderRange.Borders.LineStyle = xlNone
+    
+        For i = START_ROW To lastRow
+            Set targetCell = targetSheet.Cells(i, CODE_COLUMN)
+            
+            ' 行番号
+            targetSheet.Cells(i, LINENUM_COLUMN).Value = (i - START_ROW + 1)
+            
+            If Not IsEmpty(targetCell.Value) Then
+                ' 特定フォント色の変更
+                totalChars = Len(targetCell.Value)
+                If totalChars > 0 Then
+                    On Error Resume Next
+                    For j = 1 To totalChars
+                        If targetCell.Characters(j, 1).Font.Color = targetColor Then
+                            targetCell.Characters(j, 1).Font.Color = vbBlack
+                        End If
+                    Next j
+                    On Error GoTo 0
+                End If
+            End If
+        Next i
+        
+        ' 枠線の設定
+        borderRange.BorderAround LineStyle:=xlContinuous, Weight:=xlThick
+        borderRange.Borders(xlInsideVertical).LineStyle = xlContinuous
+        borderRange.Borders(xlInsideVertical).Weight = xlThin
+        
+    End If
+    
+    ' 5. 列幅の自動調整
+    codeColumnRange.AutoFit
+
+    ' 行番号列の書式設定
+    With linenumColumnRange.Font
+        .Name = inputFontName
+        .Size = actualFontSize
+    End With
+    linenumColumnRange.AutoFit
+    linenumColumnRange.HorizontalAlignment = xlRight
+
+    Application.ScreenUpdating = True
+    MsgBox "整形が完了しました。"
+
+End Sub
+
+Sub ClearSourceCodeReport()
+
+    ' --- ユーザー設定項目 ---
+    Const CODE_COLUMN As String = "C" ' ソースコード列
+    Const LINENUM_COLUMN As String = "B" ' 行番号列
+    Const START_ROW As Long = 2
+    ' --- 設定項目はここまで ---
+    
+    Dim targetSheet As Worksheet
+    Dim lastRow As Long
+    Dim clearRange As Range
+
+    Set targetSheet = ActiveSheet
+
+    Dim lastRowB As Long
+    Dim lastRowC As Long
+    lastRowB = targetSheet.Cells(targetSheet.Rows.Count, LINENUM_COLUMN).End(xlUp).Row
+    lastRowC = targetSheet.Cells(targetSheet.Rows.Count, CODE_COLUMN).End(xlUp).Row
+    
+    If lastRowB > lastRowC Then
+        lastRow = lastRowB
+    Else
+        lastRow = lastRowC
+    End If
+    
+    If lastRow < START_ROW Then
+        MsgBox "消去するデータが見つかりませんでした。"
+        Exit Sub
+    End If
+
+    ' 消去処理
+    Set clearRange = targetSheet.Range( _
+        targetSheet.Cells(START_ROW, LINENUM_COLUMN), _
+        targetSheet.Cells(lastRow, CODE_COLUMN) _
+    )
+    
+    clearRange.ClearContents
+    clearRange.Borders.LineStyle = xlNone
+    clearRange.Interior.ColorIndex = xlNone
+
+    MsgBox "範囲 ( " & clearRange.Address & " ) をクリアしました。"
+
+End Sub
+
