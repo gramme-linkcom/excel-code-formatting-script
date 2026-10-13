@@ -17,6 +17,8 @@
 <img src="https://github.com/gramme-linkcom/excel-code-formatting-script/blob/main/design/%E7%94%BB%E9%9D%A2%E9%8C%B2%E7%94%BB%202026-10-13%20180651.gif">
 
 <h3>7. セルの`I9`にフォントの名前、セルの`I11`にフォントサイズを指定します。</h3>
+<h4>※レポートの標準で、フォントはConsolas、フォントサイズは10.5で設定しています。ここはお好みで変更してください。</h4>
+
 <h3>8. セルの`C2`をクリックして、ソースコードを貼り付けます。</h3>
 <h4>ここまでのことを行い、デザインなどを整えると、下記の画像のようになります。(ソースコードは貼り付けていません。)<h4>
 <img src="https://github.com/gramme-linkcom/excel-code-formatting-script/blob/main/design/%E3%82%B9%E3%82%AF%E3%83%AA%E3%83%BC%E3%83%B3%E3%82%B7%E3%83%A7%E3%83%83%E3%83%88%202026-10-13%20181220.png">
